@@ -39,6 +39,9 @@ classifiers = [
     "Typing :: Typed",
 ]
 
+[project.urls]
+Repository = "https://github.com/U-238/pulsar-dispatcher"
+
 [build-system]
 # 2.4 added SPDX license expressions and license-files (PEP 639).
 requires = ["pdm-backend>=2.4"]
