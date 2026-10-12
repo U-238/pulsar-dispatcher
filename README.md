@@ -791,10 +791,8 @@ The processor follows several principles intended to keep the implementation sma
 Launch Pulsar development instance:
 
 ```
-docker network create pulsar-dispatcher-net
 docker run -d \
-  --name pulsar-dispatcher-pulsar \
-  --network pulsar-dispatcher-net \
+  --name pulsar \
   --mount source=pulsardata,target=/pulsar/data \
   --mount source=pulsarconf,target=/pulsar/conf \
   -p 6650:6650 -p 8080:8080 \
@@ -824,20 +822,3 @@ To run the linters on every commit:
 ```bash
 pdm run pre-commit install
 ```
-
-The same checks, including the integration tests, run in GitHub Actions on every push and pull request.
-
-### Releasing
-
-The package version comes from the latest git tag. Pushing a tag builds the package and publishes it:
-
-```bash
-git tag v0.1.0
-git push origin v0.1.0
-```
-
-- Every tag is published to [TestPyPI](https://test.pypi.org/p/pulsar-dispatcher).
-- Tags that do not contain `pre`, such as `v0.1.0`, are also published to [PyPI](https://pypi.org/p/pulsar-dispatcher), and get a GitHub release with Sigstore-signed artifacts.
-- Tags containing `pre`, such as `v0.2.0-pre1`, are published to TestPyPI only.
-
-Publishing uses PyPI trusted publishing, so no API tokens are stored in the repository. The `pypi` and `testpypi` environments must exist in the GitHub repository settings, and the repository must be registered as a trusted publisher for `pulsar-dispatcher` on both PyPI and TestPyPI.
