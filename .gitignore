@@ -1,0 +1,13 @@
+__pycache__/
+build/
+dist/
+.pytest_cache/
+.pdm-build/
+.env
+.venv/
+.idea/
+.pdm-python
+.python-version
+src/pulsar_dispatcher/version.py
+.coverage
+.DS_Store

@@ -1,0 +1,22 @@
+name: Lint
+
+on: [push, pull_request]
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up PDM
+        uses: pdm-project/setup-pdm@v4
+        with:
+          python-version: "3.10"
+          cache: true
+      - name: Install lint dependencies
+        # mypy also checks the tests, so it needs the test dependencies.
+        run: pdm sync --group lint --group test
+      - name: Check lint, formatting and types
+        run: pdm run lint

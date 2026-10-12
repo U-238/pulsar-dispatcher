@@ -1,0 +1,54 @@
+name: Tests
+
+on: [push, pull_request]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pdm-project/setup-pdm@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: true
+      - name: Install test dependencies
+        run: pdm sync --group test
+      - name: Run unit tests
+        run: pdm run test
+
+  integration:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pdm-project/setup-pdm@v4
+        with:
+          python-version: "3.10"
+          cache: true
+      - name: Install test dependencies
+        run: pdm sync --group test
+      - name: Start Pulsar broker
+        run: |
+          docker run -d --name pulsar -p 6650:6650 -p 8080:8080 \
+            -e PULSAR_MEM="-Xms512m -Xmx512m -XX:MaxDirectMemorySize=512m" \
+            apachepulsar/pulsar:5.0.0 bin/pulsar standalone --advertised-address localhost --no-functions-worker --no-stream-storage
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent http://localhost:8080/admin/v2/brokers/health; then
+              exit 0
+            fi
+            sleep 2
+          done
+          docker logs pulsar
+          exit 1
+      - name: Run integration tests
+        run: pdm run test-integration
+      - name: Broker logs
+        if: failure()
+        run: docker logs pulsar
